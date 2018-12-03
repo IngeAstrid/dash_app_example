@@ -1,11 +1,6 @@
 
 # coding: utf-8
 
-# # Final Project
-# Create a Dashboard taking data from Eurostat, GDP and main components (output, expenditure and income). The dashboard will have two graphs:
-# The first one will be a scatterplot with two DropDown boxes for the different indicators. It will have also a slide for the different years in the data.
-# The other graph will be a line chart with two DropDown boxes, one for the country and the other for selecting one of the indicators. (hint use Scatter object using mode = 'lines' (more here)
-
 # In[ ]:
 
 
@@ -30,19 +25,14 @@ available_indicators_n = df['NA_item'].unique()
 # get the indicators
 available_indicators_g = df['Geo'].unique()
 
-
-# ## FIRST GRAPH
-
-# In[ ]:
-
-
 # first paragraph
 # design layout
-app1 = dash.Dash(__name__)
-server = app1.server
-app1.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
+app = dash.Dash(__name__)
+server = app.server
+app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
 
-app1.layout = html.Div([
+
+app.layout = html.Div([
     html.Div([
 
         html.Div([
@@ -80,10 +70,38 @@ app1.layout = html.Div([
         value=df['Time'].max(),
         step=None,
         marks={str(year): str(year) for year in df['Time'].unique()}
-    )
+    ),
+    
+    html.Div([
+        
+        html.Div([
+            dcc.Dropdown(
+                id='Countries',
+                options=[{'label': i, 'value': i} for i in available_indicators_g],
+                value='France'
+            ),
+            
+            dcc.RadioItems(id='Countries-type')
+        
+        ],
+        style={'width': '48%', 'display': 'inline-block'}),
+
+        html.Div([
+            dcc.Dropdown(
+                id='Indicators',
+                options=[{'label': i, 'value': i} for i in available_indicators_n],
+                value='Gross domestic product at market prices'
+            ),
+            
+            dcc.RadioItems(id='Indicators-type')
+        ],
+        style={'width': '48%', 'float': 'right', 'display': 'inline-block'})
+    ]),
+
+    dcc.Graph(id='Graphic') # graph component
 ])
 
-@app1.callback( #call back function to update
+@app.callback( #call back function to update
     dash.dependencies.Output('indicator-graphic', 'figure'), #diff output, diff callbacks
     [dash.dependencies.Input('xaxis-column', 'value'),
      dash.dependencies.Input('yaxis-column', 'value'),
@@ -121,51 +139,6 @@ def update_graph(xaxis_column_name, yaxis_column_name,
             hovermode='closest'
         )
     }
-
-if __name__ == '__main__':
-    app1.run_server()
-
-
-# ## SECOND GRAPH
-
-# In[ ]:
-
-
-# second paragraph
-# design layout
-app = dash.Dash(__name__)
-server = app.server
-app.css.append_css({"external_url": "https://codepen.io/chriddyp/pen/bWLwgP.css"})
-
-app.layout = html.Div([
-    html.Div([
-        
-        html.Div([
-            dcc.Dropdown(
-                id='Countries',
-                options=[{'label': i, 'value': i} for i in available_indicators_g],
-                value='France'
-            ),
-            
-            dcc.RadioItems(id='Countries-type')
-        
-        ],
-        style={'width': '48%', 'display': 'inline-block'}),
-
-        html.Div([
-            dcc.Dropdown(
-                id='Indicators',
-                options=[{'label': i, 'value': i} for i in available_indicators_n],
-                value='Gross domestic product at market prices'
-            ),
-            
-            dcc.RadioItems(id='Indicators-type')
-        ],
-        style={'width': '48%', 'float': 'right', 'display': 'inline-block'})
-    ]),
-
-    dcc.Graph(id='Graphic') # graph component
-])
 
 @app.callback(
     dash.dependencies.Output('Graphic', 'figure'),
